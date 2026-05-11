@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 世界杯 - 冠軍大競猜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            color: white;
+            background-color: #0f172a; 
+        }
+        
+        .stadium-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -2;
+            background-image: url('https://i.imgur.com/5Rv0PBK.jpg');
+            background-size: cover;
+            background-position: center 30%; 
+            filter: brightness(0.55) contrast(1.15);
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.15);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .gold-gradient-text {
+            background: linear-gradient(
+                to bottom,
+                #fffde7 0%,
+                #fbc02d 30%,
+                #f57f17 50%,
+                #b26a00 51%,
+                #ffb300 75%,
+                #fff3e0 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 215, 0, 0.3);
+            filter: drop-shadow(0px 0px 8px rgba(255, 193, 7, 0.6)) 
+                    drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.8));
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            line-height: 1.2;
+            text-align: center;
+        }
+        
+        .bg-fade-out {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 1) 100%);
+            z-index: -1;
+        }
+
+        .vote-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+        }
+        .vote-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .vote-btn:disabled {
+            background: #4b5563;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .chance-counter {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 9999px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- 左上角 LOGO (改為 Imgur 直連路徑) -->
+    <div class="absolute top-4 left-4 md:top-6 md:left-8 z-50 flex items-center group">
+        <img src="https://i.imgur.com/1Ps31Yl.png" alt="GOGOGAME88" 
+             class="w-32 md:w-40 lg:w-48 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover:scale-105" 
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        
+        <div style="display:none;" class="flex items-center gap-2 text-yellow-400 font-extrabold text-xl md:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            <span class="text-3xl">👑</span>
+            <span class="tracking-tighter">GOGOGAME88</span>
+        </div>
+    </div>
+
+    <!-- 右上角 可競猜次數框 -->
+    <div class="absolute top-4 right-4 md:top-6 md:right-8 z-50">
+        <div class="chance-counter">
+            <span class="text-yellow-500 text-lg">🎯</span>
+            <span class="text-gray-200 text-sm md:text-base font-medium">可競猜次數：</span>
+            <span id="remaining-chances" class="text-yellow-400 text-lg md:text-xl font-black">3</span>
+        </div>
+    </div>
+
+    <div class="stadium-bg">
+        <div class="bg-fade-out"></div>
+    </div>
+
+    <!-- 頂部文案 -->
+    <header class="w-full text-center py-10 px-4 relative z-10 mt-24 md:mt-32 lg:mt-40">
+        <div class="flex flex-col items-center">
+            <h1 class="text-5xl md:text-7xl gold-gradient-text mb-2">2026 世界杯</h1>
+            <h1 class="text-5xl md:text-7xl gold-gradient-text mb-6">冠軍大競猜</h1>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-semibold text-gray-200 drop-shadow-lg">
+            瓜分 <span class="text-yellow-400 font-bold">$3,000,000</span> 獎池
+        </h2>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 pb-12 relative z-10">
+        <div id="groups-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- 內容動態插入 -->
+        </div>
+    </main>
+
+    <footer class="w-full bg-black/80 backdrop-blur-md border-t border-gray-800 text-gray-300 py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 text-xs md:text-sm leading-relaxed">
+            <h3 class="text-yellow-400 text-base md:text-lg font-bold mb-3">獎池！</h3>
+            <p class="mb-4">世界杯戰火蔓延，邊隊會係最終王者？而家嚟 GOGOGAME88.COM 體育場館投注，除咗睇波贏錢，仲可以參加競猜，一齊瓜分高達 $3,000,000 嘅超巨額獎池！</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700/50">
+                    <p class="text-yellow-400 font-bold mb-2">🏆 活動時間</p>
+                    <p class="mb-4">2026.06.11 － 2026.07.19</p>
+                    <p class="text-yellow-400 font-bold mb-2">🏆 參與方式</p>
+                    <div class="grid grid-cols-3 gap-2 text-center bg-gray-800/50 rounded p-2">
+                        <div>
+                            <span class="block text-gray-400 text-xs mb-1">參與條件</span>
+                            <span class="block font-semibold text-[10px] md:text-xs">單日體育投注 ≥ $5,000</span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-400 text-xs mb-1">競猜次數</span>
+                            <span class="block font-semibold text-yellow-500">1 次</span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-400 text-xs mb-1">單日上限</span>
+                            <span class="block font-semibold">3 次</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700/50 overflow-y-auto h-48">
+                    <p class="text-yellow-400 font-bold mb-2">📝 活動規則：</p>
+                    <ul class="list-disc pl-4 space-y-1 text-gray-400">
+                        <li>活動對象：全體 GOGOGAME88.COM 用戶。</li>
+                        <li>猜中奪冠隊伍可按票數比例瓜分 $3,000,000 大獎池！</li>
+                        <li>每日最多 3 次投票機會。獎池禮金只需 1 倍流水。</li>
+                        <li>投票截止為 2026年6月27日 00:00。</li>
+                        <li>GOGOGAME88.COM 對本活動保留最終解釋權。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="custom-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-gray-900 border border-yellow-500/50 rounded-2xl p-6 max-w-sm w-[90%] shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 id="modal-title" class="text-xl font-bold text-yellow-400 mb-3 text-center">提示</h3>
+            <p id="modal-message" class="text-gray-300 text-sm text-center mb-6"></p>
+            <button onclick="closeModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg transition shadow-md">確定</button>
+        </div>
+    </div>
+
+    <script>
+        const groupsData = [
+            { name: "A 組", teams: [{name: "墨西哥", flag: "mx", votes: 45210}, {name: "南非", flag: "za", votes: 8400}, {name: "南韓", flag: "kr", votes: 21500}, {name: "捷克", flag: "cz", votes: 12300}] },
+            { name: "B 組", teams: [{name: "加拿大", flag: "ca", votes: 15600}, {name: "波斯尼亞", flag: "ba", votes: 6200}, {name: "卡塔爾", flag: "qa", votes: 5800}, {name: "瑞士", flag: "ch", votes: 19800}] },
+            { name: "C 組", teams: [{name: "巴西", flag: "br", votes: 125400}, {name: "摩洛哥", flag: "ma", votes: 28900}, {name: "海地", flag: "ht", votes: 3100}, {name: "蘇格蘭", flag: "gb-sct", votes: 14200}] },
+            { name: "D 組", teams: [{name: "美國", flag: "us", votes: 56700}, {name: "巴拉圭", flag: "py", votes: 9800}, {name: "澳洲", flag: "au", votes: 18500}, {name: "土耳其", flag: "tr", votes: 22400}] },
+            { name: "E 組", teams: [{name: "德國", flag: "de", votes: 98500}, {name: "庫拉索", flag: "cw", votes: 1200}, {name: "科特迪瓦", flag: "ci", votes: 11500}, {name: "厄瓜多爾", flag: "ec", votes: 16700}] },
+            { name: "F 組", teams: [{name: "荷蘭", flag: "nl", votes: 76200}, {name: "日本", flag: "jp", votes: 45800}, {name: "瑞典", flag: "se", votes: 24100}, {name: "突尼西亞", flag: "tn", votes: 5600}] },
+            { name: "G 組", teams: [{name: "比利時", flag: "be", votes: 65400}, {name: "埃及", flag: "eg", votes: 13200}, {name: "伊朗", flag: "ir", votes: 8900}, {name: "紐西蘭", flag: "nz", votes: 4200}] },
+            { name: "H 組", teams: [{name: "西班牙", flag: "es", votes: 88900}, {name: "佛得角", flag: "cv", votes: 2100}, {name: "沙特阿拉伯", flag: "sa", votes: 15400}, {name: "烏拉圭", flag: "uy", votes: 34500}] },
+            { name: "I 組", teams: [{name: "法國", flag: "fr", votes: 112000}, {name: "塞內加爾", flag: "sn", votes: 18900}, {name: "伊拉克", flag: "iq", votes: 4500}, {name: "挪威", flag: "no", votes: 21300}] },
+            { name: "J 組", teams: [{name: "阿根廷", flag: "ar", votes: 134500}, {name: "阿爾及利亞", flag: "dz", votes: 12400}, {name: "奧地利", flag: "at", votes: 17600}, {name: "約旦", flag: "jo", votes: 3200}] },
+            { name: "K 組", teams: [{name: "葡萄牙", flag: "pt", votes: 105600}, {name: "民主剛果", flag: "cd", votes: 3400}, {name: "烏澤別克", flag: "uz", votes: 5100}, {name: "哥倫比亞", flag: "co", votes: 32100}] },
+            { name: "L 組", teams: [{name: "英格蘭", flag: "gb-eng", votes: 94500}, {name: "克羅地亞", flag: "hr", votes: 38700}, {name: "加納", flag: "gh", votes: 14500}, {name: "巴拿馬", flag: "pa", votes: 4600}] }
+        ];
+
+        let totalChances = 3;
+        const userPersonalVotes = {};
+
+        function renderGroups() {
+            const container = document.getElementById('groups-container');
+            let html = '';
+            groupsData.forEach((group, groupIndex) => {
+                html += `
+                    <div class="glass-panel rounded-2xl p-5 hover:bg-white/5 transition duration-300">
+                        <div class="border-b border-gray-600/50 pb-2 mb-4">
+                            <h3 class="text-xl font-bold text-yellow-400 tracking-widest text-center">${group.name}</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                `;
+                group.teams.forEach((team, teamIndex) => {
+                    const uniqueId = `votes-${groupIndex}-${teamIndex}`;
+                    const flagUrl = `https://flagcdn.com/w80/${team.flag}.png`;
+                    html += `
+                        <div class="relative flex flex-col items-center p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition group/team">
+                            <div id="user-badge-${uniqueId}" class="absolute top-1 right-1 bg-yellow-500 text-black text-[10px] font-bold rounded px-1 hidden z-10"></div>
+                            <span class="text-sm font-bold text-gray-100 mb-2">${team.name}</span>
+                            <img src="${flagUrl}" class="w-12 h-8 object-cover rounded shadow-md mb-3">
+                            <div class="flex flex-col w-full gap-2 mt-auto">
+                                <div class="bg-black/30 py-1 rounded text-[10px] text-yellow-200 text-center">
+                                    <span id="${uniqueId}">${team.votes.toLocaleString()}</span> 票
+                                </div>
+                                <button onclick="handleVote('${team.name}', '${uniqueId}')" class="vote-btn bg-yellow-500 hover:bg-yellow-400 text-black text-[10px] font-bold py-1 rounded shadow">投票</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function showModal(title, message) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function handleVote(teamName, uniqueId) {
+            if (totalChances <= 0) {
+                showModal("提示", "今日競猜次數已用完！明日請早。");
+                return;
+            }
+            totalChances--;
+            document.getElementById('remaining-chances').innerText = totalChances;
+            const votesElement = document.getElementById(uniqueId);
+            let currentVotes = parseInt(votesElement.innerText.replace(/,/g, ''));
+            votesElement.innerText = (++currentVotes).toLocaleString();
+            userPersonalVotes[teamName] = (userPersonalVotes[teamName] || 0) + 1;
+            const badge = document.getElementById(`user-badge-${uniqueId}`);
+            badge.innerText = `+${userPersonalVotes[teamName]}`;
+            badge.classList.remove('hidden');
+            showModal("投票成功！", `您已成功為 ${teamName} 投下第 ${userPersonalVotes[teamName]} 票！\n剩餘競猜次數：${totalChances} 次。`);
+            if (totalChances === 0) {
+                document.querySelectorAll('.vote-btn').forEach(btn => btn.disabled = true);
+            }
+        }
+
+        window.onload = renderGroups;
+    </script>
+</body>
+</html>
